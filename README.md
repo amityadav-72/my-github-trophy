@@ -1,6 +1,6 @@
 ## 📊 GitHub Stats
 
-- 👥 Followers: **{{FOLLOWERS}}**
-- ⭐ Stars: **{{STARS}}**
-- 📦 Repositories: **{{REPOS}}**
-- 🐞 Open Issues: **{{ISSUES}}**
+- 👥 Followers: **5**
+- ⭐ Stars: **0**
+- 📦 Repositories: **27**
+- 🐞 Open Issues: **1**
