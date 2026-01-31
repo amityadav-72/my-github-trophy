@@ -1,0 +1,80 @@
+name: Update GitHub Trophy Ranks
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # every hour
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    env:
+      USERNAME: ${{ github.repository_owner }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch GitHub data
+        env:
+          TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          curl -s -H "Authorization: token $TOKEN" \
+          https://api.github.com/users/$USERNAME > user.json
+
+          curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/search/repositories?q=user:$USERNAME" > repos.json
+
+          curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/search/issues?q=user:$USERNAME+type:issue+state:open" > issues.json
+
+      - name: Calculate ranks & update README
+        run: |
+          FOLLOWERS=$(jq .followers user.json)
+          REPOS=$(jq .public_repos user.json)
+          STARS=$(jq '[.items[].stargazers_count] | add' repos.json)
+          ISSUES=$(jq .total_count issues.json)
+
+          rank() {
+            v=$1
+            if [ "$v" -ge 100 ]; then echo "SSS"
+            elif [ "$v" -ge 80 ]; then echo "SS"
+            elif [ "$v" -ge 60 ]; then echo "S"
+            elif [ "$v" -ge 40 ]; then echo "AAA"
+            elif [ "$v" -ge 30 ]; then echo "AA"
+            elif [ "$v" -ge 20 ]; then echo "A"
+            elif [ "$v" -ge 10 ]; then echo "B"
+            elif [ "$v" -ge 1 ]; then echo "C"
+            else echo "?"
+            fi
+          }
+
+          REPOS_RANK=$(rank $REPOS)
+          STARS_RANK=$(rank $STARS)
+          FOLLOWERS_RANK=$(rank $FOLLOWERS)
+          ISSUES_RANK=$(rank $ISSUES)
+
+          sed -i "s/{{REPOS}}/$REPOS/g" README.md
+          sed -i "s/{{REPOS_RANK}}/$REPOS_RANK/g" README.md
+
+          sed -i "s/{{STARS}}/$STARS/g" README.md
+          sed -i "s/{{STARS_RANK}}/$STARS_RANK/g" README.md
+
+          sed -i "s/{{FOLLOWERS}}/$FOLLOWERS/g" README.md
+          sed -i "s/{{FOLLOWERS_RANK}}/$FOLLOWERS_RANK/g" README.md
+
+          sed -i "s/{{ISSUES}}/$ISSUES/g" README.md
+          sed -i "s/{{ISSUES_RANK}}/$ISSUES_RANK/g" README.md
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          if git diff --quiet; then
+            echo "No changes"
+          else
+            git add README.md
+            git commit -m "Update GitHub trophy ranks"
+            git push
+          fi
