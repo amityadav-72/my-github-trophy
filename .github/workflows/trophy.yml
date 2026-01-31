@@ -1,0 +1,62 @@
+name: Update GitHub Stats Card
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # every hour
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch GitHub user data
+        env:
+          TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          curl -s -H "Authorization: token $TOKEN" \
+          https://api.github.com/users/amityadav72 > user.json
+
+          curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/search/issues?q=author:amityadav72+type:issue+state:open" > issues.json
+
+          curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/search/repositories?q=user:amityadav72" > repos.json
+
+      - name: Generate SVG stats card
+        run: |
+          FOLLOWERS=$(jq .followers user.json)
+          REPOS=$(jq .public_repos user.json)
+          STARS=$(jq '[.items[].stargazers_count] | add' repos.json)
+          ISSUES=$(jq .total_count issues.json)
+
+          echo "<svg width='520' height='220' xmlns='http://www.w3.org/2000/svg'>
+            <style>
+              .label { font-size: 13px; fill: #8b949e; font-family: Arial; }
+              .value { font-size: 32px; font-weight: bold; font-family: Arial; }
+            </style>
+
+            <rect x='0' y='0' width='520' height='220' rx='12' fill='#0d1117'/>
+
+            <text x='40' y='40' class='label'>FOLLOWERS</text>
+            <text x='40' y='80' class='value' fill='#1f6feb'>$FOLLOWERS</text>
+
+            <text x='280' y='40' class='label'>REPOSITORIES</text>
+            <text x='280' y='80' class='value' fill='#2da44e'>$REPOS</text>
+
+            <text x='40' y='140' class='label'>STARS</text>
+            <text x='40' y='180' class='value' fill='#f1c40f'>$STARS</text>
+
+            <text x='280' y='140' class='label'>OPEN ISSUES</text>
+            <text x='280' y='180' class='value' fill='#d73a49'>$ISSUES</text>
+          </svg>" > trophy.svg
+
+      - name: Commit SVG
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add trophy.svg
+          git commit -m "Update GitHub stats card" || echo "No changes"
+          git push
