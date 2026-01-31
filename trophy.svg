@@ -1,0 +1,20 @@
+<svg width='520' height='220' xmlns='http://www.w3.org/2000/svg'>
+  <style>
+    .label { font-size: 13px; fill: #8b949e; font-family: Arial; }
+    .value { font-size: 32px; font-weight: bold; font-family: Arial; }
+  </style>
+
+  <rect x='0' y='0' width='520' height='220' rx='12' fill='#0d1117'/>
+
+  <text x='40' y='40' class='label'>FOLLOWERS</text>
+  <text x='40' y='80' class='value' fill='#1f6feb'>5</text>
+
+  <text x='280' y='40' class='label'>REPOSITORIES</text>
+  <text x='280' y='80' class='value' fill='#2da44e'>27</text>
+
+  <text x='40' y='140' class='label'>STARS</text>
+  <text x='40' y='180' class='value' fill='#f1c40f'>0</text>
+
+  <text x='280' y='140' class='label'>OPEN ISSUES</text>
+  <text x='280' y='180' class='value' fill='#d73a49'>0</text>
+</svg>
