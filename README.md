@@ -11,4 +11,4 @@
 
 ## 🏆 GitHub Trophy
 
-![GitHub Trophy](./trophy.svg)
+![GitHub Trophy](./trophies.svg)
