@@ -1,17 +1,17 @@
 ## 🏆 GitHub Trophies
 
 ### 📦 Repositories
-- Count: {{REPOS}}
-- Rank: {{REPOS_RANK}}
+- Count: 27
+- Rank: A
 
 ### ⭐ Stars
-- Count: {{STARS}}
-- Rank: {{STARS_RANK}}
+- Count: 1
+- Rank: C
 
 ### 👥 Followers
-- Count: {{FOLLOWERS}}
-- Rank: {{FOLLOWERS_RANK}}
+- Count: 4
+- Rank: C
 
 ### 🐞 Open Issues
-- Count: {{ISSUES}}
-- Rank: {{ISSUES_RANK}}
+- Count: 0
+- Rank: ?
