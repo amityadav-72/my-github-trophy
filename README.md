@@ -2,7 +2,7 @@
 
 | Category | Count | Rank | Progress |
 |--------|-------|------|----------|
-| 📦 Repositories | {{REPOS}} | {{REPOS_RANK}} | {{REPOS_PROGRESS}} |
-| ⭐ Stars | {{STARS}} | {{STARS_RANK}} | {{STARS_PROGRESS}} |
-| 👥 Followers | {{FOLLOWERS}} | {{FOLLOWERS_RANK}} | {{FOLLOWERS_PROGRESS}} |
-| 🐞 Open Issues | {{ISSUES}} | {{ISSUES_RANK}} | {{ISSUES_PROGRESS}} |
+| 📦 Repositories | 27 | A | [█████████░] 90% |
+| ⭐ Stars | 1 | C | [█░░░░░░░░░] 10% |
+| 👥 Followers | 4 | C | [████░░░░░░] 40% |
+| 🐞 Open Issues | 0 | ? | [░░░░░░░░░░] 0% |
