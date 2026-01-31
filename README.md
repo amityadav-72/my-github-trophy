@@ -1,6 +1,17 @@
-## 📊 GitHub Stats
+## 🏆 GitHub Trophies
 
-- 👥 Followers: **5**
-- ⭐ Stars: **0**
-- 📦 Repositories: **27**
-- 🐞 Open Issues: **1**
+### 📦 Repositories
+- Count: {{REPOS}}
+- Rank: {{REPOS_RANK}}
+
+### ⭐ Stars
+- Count: {{STARS}}
+- Rank: {{STARS_RANK}}
+
+### 👥 Followers
+- Count: {{FOLLOWERS}}
+- Rank: {{FOLLOWERS_RANK}}
+
+### 🐞 Open Issues
+- Count: {{ISSUES}}
+- Rank: {{ISSUES_RANK}}
