@@ -1,0 +1,52 @@
+name: Update GitHub Stats in README
+
+on:
+  schedule:
+    - cron: "0 * * * *"   # every hour
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetch GitHub stats
+        env:
+          TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          curl -s -H "Authorization: token $TOKEN" \
+          https://api.github.com/users/amityadav72 > user.json
+
+          curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/search/repositories?q=user:amityadav72" > repos.json
+
+          curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/search/issues?q=user:amityadav72+type:issue+state:open" > issues.json
+
+      - name: Update README numbers
+        run: |
+          FOLLOWERS=$(jq .followers user.json)
+          REPOS=$(jq .public_repos user.json)
+          STARS=$(jq '[.items[].stargazers_count] | add' repos.json)
+          ISSUES=$(jq .total_count issues.json)
+
+          sed -i "s/{{FOLLOWERS}}/$FOLLOWERS/g" README.md
+          sed -i "s/{{STARS}}/$STARS/g" README.md
+          sed -i "s/{{REPOS}}/$REPOS/g" README.md
+          sed -i "s/{{ISSUES}}/$ISSUES/g" README.md
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add README.md
+            git commit -m "Update GitHub stats"
+            git push
+          fi
