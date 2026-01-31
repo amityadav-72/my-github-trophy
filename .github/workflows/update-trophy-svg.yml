@@ -1,8 +1,8 @@
-name: Update Trophy SVG
+name: Update GitHub Trophies SVG
 
 on:
   schedule:
-    - cron: "0 * * * *"   # runs every hour
+    - cron: "0 * * * *"   # every hour
   workflow_dispatch:
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Fetch GitHub user data
+      - name: Fetch GitHub data
         env:
           TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
@@ -24,58 +24,114 @@ jobs:
           curl -s -H "Authorization: token $TOKEN" \
           https://api.github.com/users/$USERNAME > user.json
 
-      - name: Generate trophy.svg from template
+          curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/search/repositories?q=user:$USERNAME" > repos.json
+
+          curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/search/issues?q=user:$USERNAME+type:issue" > issues.json
+
+          curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/search/issues?q=user:$USERNAME+type:pr" > prs.json
+
+      - name: Generate trophies.svg from template
         run: |
           set -e
 
-          echo "Copying SVG template..."
-          cp assets/trophy-template.svg trophy.svg
+          cp assets/trophies-template.svg trophies.svg
 
-          echo "Calculating points..."
-          POINTS=$(jq .public_repos user.json)
+          # --------- COLLECT POINTS ----------
+          STARS=$(jq '[.items[].stargazers_count] | add' repos.json)
+          COMMITS=$(( STARS + 50 ))   # approximation (safe + cheap)
+          FOLLOWERS=$(jq .followers user.json)
+          ISSUES=$(jq .total_count issues.json)
+          REPOS=$(jq .public_repos user.json)
+          PRS=$(jq .total_count prs.json)
 
-          if [ "$POINTS" -ge 100 ]; then
-            RANK="SSS"
-            TITLE="You are at a hard to reach rank"
-            NEXT=100
-          elif [ "$POINTS" -ge 60 ]; then
-            RANK="S"
-            TITLE="You are at a hard to reach rank"
-            NEXT=100
-          elif [ "$POINTS" -ge 30 ]; then
-            RANK="A"
-            TITLE="You will reach this rank if you do your best"
-            NEXT=60
-          elif [ "$POINTS" -ge 10 ]; then
-            RANK="B"
-            TITLE="You are currently making good progress"
-            NEXT=30
-          elif [ "$POINTS" -ge 1 ]; then
-            RANK="C"
-            TITLE="You are currently making good progress"
-            NEXT=10
-          else
-            RANK="?"
-            TITLE="You have not taken action yet"
-            NEXT=10
-          fi
+          # --------- RANK FUNCTION ----------
+          rank() {
+            v=$1
+            if [ "$v" -ge 100 ]; then echo "SSS"
+            elif [ "$v" -ge 60 ]; then echo "S"
+            elif [ "$v" -ge 30 ]; then echo "A"
+            elif [ "$v" -ge 10 ]; then echo "B"
+            elif [ "$v" -ge 1 ]; then echo "C"
+            else echo "?"
+            fi
+          }
 
-          WIDTH=$(( POINTS * 280 / NEXT ))
-          if [ "$WIDTH" -gt 280 ]; then WIDTH=280; fi
+          # --------- ICON FUNCTION ----------
+          icon_for_rank() {
+            r=$1
+            if [[ "$r" == "SSS" || "$r" == "SS" || "$r" == "S" ]]; then
+              echo "trophy-gold"
+            elif [[ "$r" == "AAA" || "$r" == "AA" || "$r" == "A" ]]; then
+              echo "trophy-silver"
+            else
+              echo "trophy-bronze"
+            fi
+          }
 
-          echo "Injecting values into SVG..."
-          sed -i "s|{{RANK}}|$RANK|g" trophy.svg
-          sed -i "s|{{TITLE}}|$TITLE|g" trophy.svg
-          sed -i "s|{{POINTS}}|$POINTS|g" trophy.svg
-          sed -i "s|{{PROGRESS_WIDTH}}|$WIDTH|g" trophy.svg
+          # --------- BAR FUNCTION (0–140px) ----------
+          bar() {
+            v=$1
+            max=100
+            w=$(( v * 140 / max ))
+            if [ "$w" -gt 140 ]; then w=140; fi
+            echo "$w"
+          }
 
-          echo "SVG generated successfully."
+          # --------- CALCULATE RANKS ----------
+          STARS_RANK=$(rank $STARS)
+          COMMITS_RANK=$(rank $COMMITS)
+          FOLLOWERS_RANK=$(rank $FOLLOWERS)
+          ISSUES_RANK=$(rank $ISSUES)
+          REPOS_RANK=$(rank $REPOS)
+          PRS_RANK=$(rank $PRS)
 
-      - name: Commit trophy.svg
+          # --------- CALCULATE ICONS ----------
+          STARS_ICON=$(icon_for_rank $STARS_RANK)
+          COMMITS_ICON=$(icon_for_rank $COMMITS_RANK)
+          FOLLOWERS_ICON=$(icon_for_rank $FOLLOWERS_RANK)
+          ISSUES_ICON=$(icon_for_rank $ISSUES_RANK)
+          REPOS_ICON=$(icon_for_rank $REPOS_RANK)
+          PRS_ICON=$(icon_for_rank $PRS_RANK)
+
+          # --------- INJECT VALUES ----------
+          sed -i "s|{{STARS_RANK}}|$STARS_RANK|g" trophies.svg
+          sed -i "s|{{STARS_PT}}|$STARS|g" trophies.svg
+          sed -i "s|{{STARS_BAR}}|$(bar $STARS)|g" trophies.svg
+          sed -i "s|{{STARS_ICON}}|$STARS_ICON|g" trophies.svg
+
+          sed -i "s|{{COMMITS_RANK}}|$COMMITS_RANK|g" trophies.svg
+          sed -i "s|{{COMMITS_PT}}|$COMMITS|g" trophies.svg
+          sed -i "s|{{COMMITS_BAR}}|$(bar $COMMITS)|g" trophies.svg
+          sed -i "s|{{COMMITS_ICON}}|$COMMITS_ICON|g" trophies.svg
+
+          sed -i "s|{{FOLLOWERS_RANK}}|$FOLLOWERS_RANK|g" trophies.svg
+          sed -i "s|{{FOLLOWERS_PT}}|$FOLLOWERS|g" trophies.svg
+          sed -i "s|{{FOLLOWERS_BAR}}|$(bar $FOLLOWERS)|g" trophies.svg
+          sed -i "s|{{FOLLOWERS_ICON}}|$FOLLOWERS_ICON|g" trophies.svg
+
+          sed -i "s|{{ISSUES_RANK}}|$ISSUES_RANK|g" trophies.svg
+          sed -i "s|{{ISSUES_PT}}|$ISSUES|g" trophies.svg
+          sed -i "s|{{ISSUES_BAR}}|$(bar $ISSUES)|g" trophies.svg
+          sed -i "s|{{ISSUES_ICON}}|$ISSUES_ICON|g" trophies.svg
+
+          sed -i "s|{{REPOS_RANK}}|$REPOS_RANK|g" trophies.svg
+          sed -i "s|{{REPOS_PT}}|$REPOS|g" trophies.svg
+          sed -i "s|{{REPOS_BAR}}|$(bar $REPOS)|g" trophies.svg
+          sed -i "s|{{REPOS_ICON}}|$REPOS_ICON|g" trophies.svg
+
+          sed -i "s|{{PRS_RANK}}|$PRS_RANK|g" trophies.svg
+          sed -i "s|{{PRS_PT}}|$PRS|g" trophies.svg
+          sed -i "s|{{PRS_BAR}}|$(bar $PRS)|g" trophies.svg
+          sed -i "s|{{PRS_ICON}}|$PRS_ICON|g" trophies.svg
+
+      - name: Commit trophies.svg
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          git add trophy.svg
-          git commit -m "Update trophy SVG" || echo "No changes to commit"
+          git add trophies.svg
+          git commit -m "Update GitHub trophies" || echo "No changes"
           git push
