@@ -1,0 +1,51 @@
+<svg width="320" height="180" viewBox="0 0 320 180"
+     xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Background -->
+  <rect x="0" y="0" width="320" height="180" rx="14" fill="#0d1117"/>
+
+  <!-- Border -->
+  <rect x="1" y="1" width="318" height="178" rx="13"
+        fill="none" stroke="#30363d"/>
+
+  <!-- Rank -->
+  <text x="160" y="42"
+        font-size="28"
+        font-weight="bold"
+        fill="#facc15"
+        text-anchor="middle"
+        font-family="Segoe UI, Arial, sans-serif">
+    B
+  </text>
+
+  <!-- Title -->
+  <text x="160" y="68"
+        font-size="12"
+        fill="#c9d1d9"
+        text-anchor="middle"
+        font-family="Segoe UI, Arial, sans-serif">
+    You are currently making good progress
+  </text>
+
+  <!-- Points -->
+  <text x="20" y="110"
+        font-size="14"
+        fill="#8b949e"
+        font-family="Segoe UI, Arial, sans-serif">
+    27 pt
+  </text>
+
+  <!-- Progress background -->
+  <rect x="20" y="130"
+        width="280" height="8"
+        rx="4"
+        fill="#30363d"/>
+
+  <!-- Progress fill -->
+  <rect x="20" y="130"
+        width="252"
+        height="8"
+        rx="4"
+        fill="#22c55e"/>
+
+</svg>
