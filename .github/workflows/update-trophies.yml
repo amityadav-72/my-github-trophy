@@ -1,4 +1,4 @@
-name: Update GitHub Trophy Table
+name: Update Text-Based GitHub Trophies
 
 on:
   schedule:
@@ -26,82 +26,67 @@ jobs:
           "https://api.github.com/search/repositories?q=user:$USERNAME" > repos.json
 
           curl -s -H "Authorization: token $TOKEN" \
-          "https://api.github.com/search/issues?q=user:$USERNAME+type:issue+state:open" > issues.json
+          "https://api.github.com/search/issues?q=user:$USERNAME+type:issue" > issues.json
 
-      - name: Calculate ranks and progress
+          curl -s -H "Authorization: token $TOKEN" \
+          "https://api.github.com/search/issues?q=user:$USERNAME+type:pr" > prs.json
+
+      - name: Calculate trophies
         run: |
           FOLLOWERS=$(jq .followers user.json)
           REPOS=$(jq .public_repos user.json)
           STARS=$(jq '[.items[].stargazers_count] | add' repos.json)
           ISSUES=$(jq .total_count issues.json)
+          PRS=$(jq .total_count prs.json)
+          COMMITS=$((STARS + REPOS * 5))   # approximation (text-only safe)
 
           rank() {
             v=$1
             if [ "$v" -ge 100 ]; then echo "SSS"
-            elif [ "$v" -ge 80 ]; then echo "SS"
             elif [ "$v" -ge 60 ]; then echo "S"
-            elif [ "$v" -ge 40 ]; then echo "AAA"
-            elif [ "$v" -ge 30 ]; then echo "AA"
-            elif [ "$v" -ge 20 ]; then echo "A"
+            elif [ "$v" -ge 30 ]; then echo "A"
             elif [ "$v" -ge 10 ]; then echo "B"
             elif [ "$v" -ge 1 ]; then echo "C"
             else echo "?"
             fi
           }
 
-          next_threshold() {
+          progress() {
             v=$1
-            if [ "$v" -ge 100 ]; then echo 100
-            elif [ "$v" -ge 80 ]; then echo 100
-            elif [ "$v" -ge 60 ]; then echo 80
-            elif [ "$v" -ge 40 ]; then echo 60
-            elif [ "$v" -ge 30 ]; then echo 40
-            elif [ "$v" -ge 20 ]; then echo 30
-            elif [ "$v" -ge 10 ]; then echo 20
-            else echo 10
-            fi
-          }
-
-          bar() {
-            value=$1
-            max=$(next_threshold $value)
-            percent=$(( value * 100 / max ))
-            filled=$(( percent / 10 ))
+            max=100
+            pct=$(( v * 100 / max ))
+            filled=$(( pct / 10 ))
             empty=$(( 10 - filled ))
-
-            printf "["
-            for i in $(seq 1 $filled); do printf "█"; done
-            for i in $(seq 1 $empty); do printf "░"; done
-            printf "] %d%%" "$percent"
+            printf ""
+            for i in $(seq 1 $filled); do printf "●"; done
+            for i in $(seq 1 $empty); do printf "○"; done
           }
-
-          REPOS_RANK=$(rank $REPOS)
-          STARS_RANK=$(rank $STARS)
-          FOLLOWERS_RANK=$(rank $FOLLOWERS)
-          ISSUES_RANK=$(rank $ISSUES)
-
-          REPOS_PROGRESS=$(bar $REPOS)
-          STARS_PROGRESS=$(bar $STARS)
-          FOLLOWERS_PROGRESS=$(bar $FOLLOWERS)
-          ISSUES_PROGRESS=$(bar $ISSUES)
-
-          sed -i "s|{{REPOS}}|$REPOS|g" README.md
-          sed -i "s|{{REPOS_RANK}}|$REPOS_RANK|g" README.md
-          sed -i "s|{{REPOS_PROGRESS}}|$REPOS_PROGRESS|g" README.md
 
           sed -i "s|{{STARS}}|$STARS|g" README.md
-          sed -i "s|{{STARS_RANK}}|$STARS_RANK|g" README.md
-          sed -i "s|{{STARS_PROGRESS}}|$STARS_PROGRESS|g" README.md
+          sed -i "s|{{STARS_RANK}}|$(rank $STARS)|g" README.md
+          sed -i "s|{{STARS_PROGRESS}}|$(progress $STARS)|g" README.md
+
+          sed -i "s|{{COMMITS}}|$COMMITS|g" README.md
+          sed -i "s|{{COMMITS_RANK}}|$(rank $COMMITS)|g" README.md
+          sed -i "s|{{COMMITS_PROGRESS}}|$(progress $COMMITS)|g" README.md
 
           sed -i "s|{{FOLLOWERS}}|$FOLLOWERS|g" README.md
-          sed -i "s|{{FOLLOWERS_RANK}}|$FOLLOWERS_RANK|g" README.md
-          sed -i "s|{{FOLLOWERS_PROGRESS}}|$FOLLOWERS_PROGRESS|g" README.md
+          sed -i "s|{{FOLLOWERS_RANK}}|$(rank $FOLLOWERS)|g" README.md
+          sed -i "s|{{FOLLOWERS_PROGRESS}}|$(progress $FOLLOWERS)|g" README.md
 
           sed -i "s|{{ISSUES}}|$ISSUES|g" README.md
-          sed -i "s|{{ISSUES_RANK}}|$ISSUES_RANK|g" README.md
-          sed -i "s|{{ISSUES_PROGRESS}}|$ISSUES_PROGRESS|g" README.md
+          sed -i "s|{{ISSUES_RANK}}|$(rank $ISSUES)|g" README.md
+          sed -i "s|{{ISSUES_PROGRESS}}|$(progress $ISSUES)|g" README.md
 
-      - name: Commit changes
+          sed -i "s|{{REPOS}}|$REPOS|g" README.md
+          sed -i "s|{{REPOS_RANK}}|$(rank $REPOS)|g" README.md
+          sed -i "s|{{REPOS_PROGRESS}}|$(progress $REPOS)|g" README.md
+
+          sed -i "s|{{PRS}}|$PRS|g" README.md
+          sed -i "s|{{PRS_RANK}}|$(rank $PRS)|g" README.md
+          sed -i "s|{{PRS_PROGRESS}}|$(progress $PRS)|g" README.md
+
+      - name: Commit updates
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
@@ -110,6 +95,6 @@ jobs:
             echo "No changes"
           else
             git add README.md
-            git commit -m "Update GitHub trophy table"
+            git commit -m "Update text-based GitHub trophies"
             git push
           fi
