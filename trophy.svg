@@ -1,51 +1,20 @@
-<svg width="320" height="180" viewBox="0 0 320 180"
-     xmlns="http://www.w3.org/2000/svg">
+<svg width='520' height='220' xmlns='http://www.w3.org/2000/svg'>
+  <style>
+    .label { font-size: 13px; fill: #8b949e; font-family: Arial; }
+    .value { font-size: 32px; font-weight: bold; font-family: Arial; }
+  </style>
 
-  <!-- Background -->
-  <rect x="0" y="0" width="320" height="180" rx="14" fill="#0d1117"/>
+  <rect x='0' y='0' width='520' height='220' rx='12' fill='#0d1117'/>
 
-  <!-- Border -->
-  <rect x="1" y="1" width="318" height="178" rx="13"
-        fill="none" stroke="#30363d"/>
+  <text x='40' y='40' class='label'>FOLLOWERS</text>
+  <text x='40' y='80' class='value' fill='#1f6feb'>5</text>
 
-  <!-- Rank -->
-  <text x="160" y="42"
-        font-size="28"
-        font-weight="bold"
-        fill="#facc15"
-        text-anchor="middle"
-        font-family="Segoe UI, Arial, sans-serif">
-    B
-  </text>
+  <text x='280' y='40' class='label'>REPOSITORIES</text>
+  <text x='280' y='80' class='value' fill='#2da44e'>27</text>
 
-  <!-- Title -->
-  <text x="160" y="68"
-        font-size="12"
-        fill="#c9d1d9"
-        text-anchor="middle"
-        font-family="Segoe UI, Arial, sans-serif">
-    You are currently making good progress
-  </text>
+  <text x='40' y='140' class='label'>STARS</text>
+  <text x='40' y='180' class='value' fill='#f1c40f'>0</text>
 
-  <!-- Points -->
-  <text x="20" y="110"
-        font-size="14"
-        fill="#8b949e"
-        font-family="Segoe UI, Arial, sans-serif">
-    27 pt
-  </text>
-
-  <!-- Progress background -->
-  <rect x="20" y="130"
-        width="280" height="8"
-        rx="4"
-        fill="#30363d"/>
-
-  <!-- Progress fill -->
-  <rect x="20" y="130"
-        width="252"
-        height="8"
-        rx="4"
-        fill="#22c55e"/>
-
+  <text x='280' y='140' class='label'>OPEN ISSUES</text>
+  <text x='280' y='180' class='value' fill='#d73a49'>1</text>
 </svg>
