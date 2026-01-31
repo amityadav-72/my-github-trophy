@@ -2,7 +2,7 @@ name: Update Trophy SVG
 
 on:
   schedule:
-    - cron: "0 * * * *"   # every hour
+    - cron: "0 * * * *"   # runs every hour
   workflow_dispatch:
 
 jobs:
@@ -13,20 +13,27 @@ jobs:
       USERNAME: ${{ github.repository_owner }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Fetch GitHub stats
+      - name: Fetch GitHub user data
         env:
           TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
+          set -e
           curl -s -H "Authorization: token $TOKEN" \
           https://api.github.com/users/$USERNAME > user.json
 
       - name: Generate trophy.svg from template
         run: |
+          set -e
+
+          echo "Copying SVG template..."
+          cp assets/trophy-template.svg trophy.svg
+
+          echo "Calculating points..."
           POINTS=$(jq .public_repos user.json)
 
-          # -------- RANK LOGIC (same idea as original) --------
           if [ "$POINTS" -ge 100 ]; then
             RANK="SSS"
             TITLE="You are at a hard to reach rank"
@@ -53,27 +60,22 @@ jobs:
             NEXT=10
           fi
 
-          # -------- PROGRESS WIDTH (max bar = 280px) --------
           WIDTH=$(( POINTS * 280 / NEXT ))
           if [ "$WIDTH" -gt 280 ]; then WIDTH=280; fi
 
-          # -------- BUILD SVG --------
-          cp assets/trophy-template.svg trophy.svg
+          echo "Injecting values into SVG..."
+          sed -i "s|{{RANK}}|$RANK|g" trophy.svg
+          sed -i "s|{{TITLE}}|$TITLE|g" trophy.svg
+          sed -i "s|{{POINTS}}|$POINTS|g" trophy.svg
+          sed -i "s|{{PROGRESS_WIDTH}}|$WIDTH|g" trophy.svg
 
-          sed -i "s/{{RANK}}/$RANK/g" trophy.svg
-          sed -i "s/{{TITLE}}/$TITLE/g" trophy.svg
-          sed -i "s/{{POINTS}}/$POINTS/g" trophy.svg
-          sed -i "s/{{PROGRESS_WIDTH}}/${WIDTH}/g" trophy.svg
+          echo "SVG generated successfully."
 
-      - name: Commit trophy
+      - name: Commit trophy.svg
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          if git diff --quiet; then
-            echo "No changes"
-          else
-            git add trophy.svg
-            git commit -m "Update trophy SVG"
-            git push
-          fi
+          git add trophy.svg
+          git commit -m "Update trophy SVG" || echo "No changes to commit"
+          git push
