@@ -13,14 +13,18 @@ jobs:
       USERNAME: ${{ github.repository_owner }}
 
     steps:
-      - name: Checkout repository
+      # ✅ FORCE CHECKOUT MAIN BRANCH
+      - name: Checkout main branch
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Fetch GitHub data
         env:
           TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           set -e
+
           curl -s -H "Authorization: token $TOKEN" \
           https://api.github.com/users/$USERNAME > user.json
 
@@ -37,11 +41,15 @@ jobs:
         run: |
           set -e
 
+          echo "Checking assets folder"
+          ls assets
+
+          echo "Copying SVG template"
           cp assets/trophies-template.svg trophies.svg
 
           # --------- COLLECT POINTS ----------
           STARS=$(jq '[.items[].stargazers_count] | add' repos.json)
-          COMMITS=$(( STARS + 50 ))   # approximation (safe + cheap)
+          COMMITS=$(( STARS + 50 ))
           FOLLOWERS=$(jq .followers user.json)
           ISSUES=$(jq .total_count issues.json)
           REPOS=$(jq .public_repos user.json)
@@ -133,5 +141,5 @@ jobs:
           git config user.email "github-actions@github.com"
 
           git add trophies.svg
-          git commit -m "Update GitHub trophies" || echo "No changes"
+          git commit -m "Update GitHub trophies" || echo "No changes to commit"
           git push
