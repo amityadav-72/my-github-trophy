@@ -1,1 +1,6 @@
-![GitHub Stats](https://raw.githubusercontent.com/amityadav72/my-github-trophy/main/trophy.svg)
+## 📊 GitHub Stats
+
+- 👥 Followers: **{{FOLLOWERS}}**
+- ⭐ Stars: **{{STARS}}**
+- 📦 Repositories: **{{REPOS}}**
+- 🐞 Open Issues: **{{ISSUES}}**
