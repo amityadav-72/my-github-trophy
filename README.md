@@ -10,7 +10,6 @@
 | 🔁 Pull Requests | First PR | C | 5 pt | ○○○○○○○○○○ |
 
 
-
 ## 🏆 GitHub Trophy
 
 ![GitHub Trophy](./trophies.svg)
