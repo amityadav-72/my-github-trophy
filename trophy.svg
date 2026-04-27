@@ -13,8 +13,8 @@
   <text x='280' y='80' class='value' fill='#2da44e'>27</text>
 
   <text x='40' y='140' class='label'>STARS</text>
-  <text x='40' y='180' class='value' fill='#f1c40f'>0</text>
+  <text x='40' y='180' class='value' fill='#f1c40f'>null</text>
 
   <text x='280' y='140' class='label'>OPEN ISSUES</text>
-  <text x='280' y='180' class='value' fill='#d73a49'>1</text>
+  <text x='280' y='180' class='value' fill='#d73a49'>0</text>
 </svg>
